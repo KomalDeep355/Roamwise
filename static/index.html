@@ -1,0 +1,331 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5eb">
+
+  <title>Roamwise — Step out. Choose wisely.</title>
+  <meta name="description" content="Plan your time outdoors with hourly air-quality forecasts, practical guidance and nearby parks.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Roamwise home">
+      <span class="brand-mark" aria-hidden="true">✳</span>
+      <span>roamwise<span class="brand-period">.</span></span>
+    </a>
+
+    <div class="header-note">
+      <span class="status-dot"></span>
+      Make room for the outdoors
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <p class="eyebrow"><span aria-hidden="true">✿</span> A little more outside</p>
+      <h1>Step out.<br><span>Choose wisely.</span></h1>
+      <p class="intro-copy">
+        Find a better time to walk, run or visit a park.
+        We’ll help you check the air before you head out.
+      </p>
+    </section>
+
+    <section class="planner-card" aria-label="Outdoor plan settings">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR OUTDOOR PLAN</p>
+          <h2>Where are we going?</h2>
+        </div>
+        <span class="heading-leaf" aria-hidden="true">❋</span>
+      </div>
+
+      <div class="destination-layout">
+        <div class="destination-search">
+          <form id="search" class="search-row" autocomplete="off">
+            <label class="sr-only" for="q">Search for a city or place</label>
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input
+              id="q"
+              type="search"
+              placeholder="Where do you want to go?"
+              minlength="2"
+              required
+            >
+            <button type="button" id="voice-search" class="voice-button"
+              aria-label="Search by voice" title="Search by voice">
+              <span aria-hidden="true">🎙</span>
+            </button>
+            <button type="submit" class="button button-primary">Search <span aria-hidden="true">↗</span></button>
+          </form>
+
+          <button type="button" id="locate" class="location-button">
+            <span aria-hidden="true">◎</span> Use my location
+          </button>
+
+          <p id="voice-status" class="voice-status" aria-live="polite"></p>
+        </div>
+
+        <div class="quick-picks">
+          <span class="field-caption">OR TRY SOMEWHERE</span>
+          <div id="presets" class="chips" aria-label="Quick picks"></div>
+        </div>
+      </div>
+
+      <ul id="matches" class="matches" hidden></ul>
+
+      <div class="settings-divider"></div>
+
+      <div class="section-heading settings-heading">
+        <div>
+          <p class="eyebrow">PERSONALISE YOUR PLAN</p>
+          <h2>Make it yours</h2>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <label>
+          <span class="field-caption">WHO'S GOING?</span>
+          <select id="profile">
+            <option value="general">Most adults</option>
+            <option value="sensitive">Children, older adults, heart or lung conditions</option>
+          </select>
+        </label>
+
+        <label>
+          <span class="field-caption">WHAT'S THE PLAN?</span>
+          <select id="intensity">
+            <option value="light">A relaxed walk</option>
+            <option value="vigorous">Running or hard exercise</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="toggle-row" for="daylight">
+        <span class="toggle-copy">
+          <span class="toggle-title">Prefer daylight?</span>
+          <span class="toggle-description">Prioritise outdoor windows during daylight hours.</span>
+        </span>
+        <input id="daylight" type="checkbox" checked>
+        <span class="toggle-ui" aria-hidden="true"></span>
+      </label>
+    </section>
+
+    <p id="status" class="status-message" role="status" aria-live="polite"></p>
+
+    <div id="results" hidden>
+      <section id="hero" class="hero result-hero" data-verdict="unknown" aria-live="polite">
+        <div class="hero-topline">
+          <span class="hero-icon" aria-hidden="true">✿</span>
+          <span class="hero-label">YOUR AIR CHECK</span>
+          <span class="live-label"><span class="status-dot"></span> Forecast overview</span>
+        </div>
+
+        <p id="place" class="place"></p>
+        <h2 id="verdict"></h2>
+        <p id="reading" class="hero-reading"></p>
+
+        <div class="hero-divider"></div>
+
+        <p class="window-label">YOUR OUTDOOR WINDOW</p>
+        <p id="window" class="window-copy"></p>
+      </section>
+
+      <section class="panel forecast-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">PLAN AHEAD</p>
+            <h2>Air through the day</h2>
+            <p class="panel-subtitle">Explore the forecast for the next 24 hours.</p>
+          </div>
+          <span class="panel-icon" aria-hidden="true">◷</span>
+        </div>
+
+        <div class="chart-legend" aria-label="Chart legend">
+          <span><i class="legend-dot legend-go"></i> Good to go</span>
+          <span><i class="legend-dot legend-caution"></i> Go easy</span>
+          <span><i class="legend-dot legend-avoid"></i> Stay in</span>
+        </div>
+
+        <div id="chart" class="chart"></div>
+
+        <p class="caption">
+          PM2.5 is shown in µg/m³. Dashed lines mark the thresholds used for your selected settings.
+          Pale bars indicate hours after dark.
+        </p>
+      </section>
+
+      <div class="results-grid">
+        <section class="panel explanation-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">THE TAKEAWAY</p>
+              <h2>Your fresh-air game plan</h2>
+            </div>
+            <span class="panel-icon" aria-hidden="true">✳</span>
+          </div>
+
+          <label class="language-control">
+            <span class="field-caption">EXPLANATION LANGUAGE</span>
+            <select id="lang">
+              <option value="en">English</option>
+              <option value="hinglish">Hinglish</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </label>
+
+          <p id="explanation" class="explanation"></p>
+          <p id="explain-source" class="fine"></p>
+          <ul id="warnings" class="warnings"></ul>
+        </section>
+
+        <section class="panel parks-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">NEAR YOUR LOCATION</p>
+              <h2>Find your green space</h2>
+              <p class="panel-subtitle">Nearby parks within 3 km.</p>
+            </div>
+            <span class="panel-icon" aria-hidden="true">♧</span>
+          </div>
+
+          <ul id="parks" class="parks"></ul>
+        </section>
+      </div>
+
+      <section class="panel tips-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">SMALL STEPS, BETTER OUTINGS</p>
+            <h2>Little things that help</h2>
+            <p class="panel-subtitle">A few practical ideas for your time outside.</p>
+          </div>
+          <span class="panel-icon" aria-hidden="true">❋</span>
+        </div>
+
+        <ul id="tips" class="tips-list"></ul>
+
+        <p class="fine">
+          These are general precautions, not a guarantee of safety.
+          Follow local health advice, especially if you have a heart or lung condition.
+        </p>
+      </section>
+
+      <section class="panel map-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">GET OUT THERE</p>
+            <h2>Your neighbourhood</h2>
+            <p class="panel-subtitle">Explore the selected location and nearby parks.</p>
+          </div>
+          <span class="panel-icon" aria-hidden="true">⌖</span>
+        </div>
+        <div id="map" role="region" aria-label="Map of your location and nearby parks"></div>
+      </section>
+
+      <p class="data-note">
+        <span aria-hidden="true">ⓘ</span>
+        Air quality is modelled for the surrounding area, not individual parks.
+        Nearby parks are listed by distance.
+      </p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <a class="footer-brand" href="/">roamwise<span class="brand-period">.</span></a>
+    <p>More mindful moments outdoors.</p>
+    <p>
+      Air quality and weather: Open-Meteo. Parks: OpenStreetMap contributors.
+      Air-quality verdicts use fixed PM2.5 rules; the language model only explains the result.
+      This is general guidance, not medical advice. People with heart or lung conditions
+      should follow their clinician's advice.
+    </p>
+    <p class="privacy-note">Your location is used to retrieve local information for this page.</p>
+
+    <!-- Floating Roamwise assistant -->
+    <div id="roamwise-chat" class="chat-widget">
+      <div
+        id="chat-window"
+        class="chat-window"
+        role="dialog"
+        aria-labelledby="chat-title"
+        aria-hidden="true"
+        hidden
+      >
+        <div class="chat-header">
+          <div class="chat-avatar" aria-hidden="true">R</div>
+          <div class="chat-header-copy">
+            <h2 id="chat-title">Ask Roamwise</h2>
+            <p>Here to help you step out wisely</p>
+          </div>
+          <button id="chat-close" class="chat-close" type="button"
+            aria-label="Close chat">×</button>
+        </div>
+
+        <div id="chat-suggestions" class="chat-suggestions" aria-label="Suggested questions"></div>
+
+        <div id="agent-messages" class="chat-messages"
+          role="log" aria-live="polite" aria-relevant="additions"></div>
+        <p id="agent-status" class="chat-status" role="status" aria-live="polite"></p>
+
+        <form id="agent-form" class="chat-form">
+          <label class="visually-hidden" for="agent-input">
+            Your question
+          </label>
+
+          <textarea
+            id="agent-input"
+            rows="2"
+            maxlength="1000"
+            placeholder="Ask about your outdoor plan…"
+            required
+          ></textarea>
+
+          <button
+            type="button"
+            id="agent-mic"
+            class="agent-mic"
+            aria-label="Speak to Roamwise"
+            title="Speak to Roamwise"
+          >🎙</button>
+
+          <button
+            type="submit"
+            id="agent-send"
+            class="button button-primary"
+            aria-label="Send question"
+          >
+            <span aria-hidden="true">↗</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="chat-launcher-wrap">
+        <div id="chat-greeting" class="chat-greeting">
+          <strong>Hi there 👋</strong>
+          <span>How can we help?</span>
+          <span>Send us a message</span>
+        </div>
+        <button id="chat-toggle" class="chat-toggle" type="button"
+          aria-label="Open Roamwise assistant" aria-controls="chat-window" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.75L4 20l1.5-4.1A7.5 7.5 0 1 1 20 11.5Z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
