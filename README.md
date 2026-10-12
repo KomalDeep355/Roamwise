@@ -8,9 +8,8 @@ Built with Delhi NCR in mind, where "go outside" can be bad advice around Diwali
 
 **Live demo:** [https://roamwise-4e26.onrender.com](https://roamwise-4e26.onrender.com)
 
-**Write-up on DEV:** (https://dev.to/komal_deep_355/in-delhi-ncr-go-touch-grass-can-be-bad-advice-so-i-built-a-tool-that-checks-the-air-first-355j)
+**Write-up on DEV:** https://dev.to/komal_deep_355/in-delhi-ncr-go-touch-grass-can-be-bad-advice-so-i-built-a-tool-that-checks-the-air-first-355j
 
----
 
 ## The one design rule
 
